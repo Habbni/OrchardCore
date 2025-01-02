@@ -44,6 +44,8 @@ public sealed class Startup : StartupBase
 
         services.AddDataMigration<Migrations>();
         services.AddScoped<IContentDefinitionHandler, DashboardPartContentTypeDefinitionHandler>();
+
+        services.AddScoped<AdminDashboardCultureService>();
     }
 
     public override void Configure(IApplicationBuilder builder, IEndpointRouteBuilder routes, IServiceProvider serviceProvider)

@@ -24,7 +24,8 @@ public sealed class DashboardController : Controller
     private readonly IContentItemDisplayManager _contentItemDisplayManager;
     private readonly IContentDefinitionManager _contentDefinitionManager;
     private readonly IUpdateModelAccessor _updateModelAccessor;
-    private readonly YesSql.ISession _session;
+    private readonly YesSql.ISession _session;    
+    private readonly AdminDashboardCultureService _adminDashboardCultureService;
 
     public DashboardController(
         IAuthorizationService authorizationService,
@@ -33,7 +34,8 @@ public sealed class DashboardController : Controller
         IContentItemDisplayManager contentItemDisplayManager,
         IContentDefinitionManager contentDefinitionManager,
         IUpdateModelAccessor updateModelAccessor,
-        YesSql.ISession session)
+        YesSql.ISession session,
+        AdminDashboardCultureService adminDashboardCultureService)
     {
         _authorizationService = authorizationService;
         _adminDashboardService = adminDashboardService;
@@ -42,6 +44,7 @@ public sealed class DashboardController : Controller
         _contentDefinitionManager = contentDefinitionManager;
         _updateModelAccessor = updateModelAccessor;
         _session = session;
+        _adminDashboardCultureService = adminDashboardCultureService;
     }
 
     public async Task<IActionResult> Index()
@@ -59,6 +62,10 @@ public sealed class DashboardController : Controller
             var widgets = await _adminDashboardService.GetWidgetsAsync(x => x.Published);
             foreach (var widget in widgets)
             {
+                if (!_adminDashboardCultureService.IsCultureMatching(widget))
+                {
+                    continue;
+                }
                 if (!widgetContentTypes.ContainsKey(widget.ContentType))
                 {
                     continue;
@@ -102,7 +109,7 @@ public sealed class DashboardController : Controller
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         foreach (var ctd in widgetContentTypes.Values.OrderBy(x => x.DisplayName))
-        {
+        {            
             if (!await _authorizationService.AuthorizeContentTypeAsync(User, CommonPermissions.EditContent, ctd.Name, userId))
             {
                 continue;
@@ -115,6 +122,10 @@ public sealed class DashboardController : Controller
         var wrappers = new List<DashboardWrapper>();
         foreach (var widget in widgets)
         {
+            if (!_adminDashboardCultureService.IsCultureMatching(widget))
+            {
+                continue;
+            }
             if (!widgetContentTypes.ContainsKey(widget.ContentType)
                 || !await _authorizationService.AuthorizeContentTypeAsync(User, CommonPermissions.EditContent, widget.ContentType, userId))
             {
