@@ -1,16 +1,10 @@
 @model DashboardWrapper
 @using OrchardCore.ContentManagement
-@using System.Globalization
 
 @{
     var dashboardPart = Model.Dashboard.As<DashboardPart>();
-    var localizationCulture = Model.Dashboard.Content.LocalizationPart?.Culture?.ToString();
-    bool isWrongCulture = (!string.IsNullOrEmpty(localizationCulture)) && (localizationCulture != CultureInfo.CurrentUICulture.Name);
 }
 
-@if (!isWrongCulture)
-{
-    <div style="--dashboard-width: @(dashboardPart.Width); --dashboard-height: @(dashboardPart.Height);" class="dashboard-wrapper rounded" id="@(Model.Dashboard.ContentItemId)">
-        @await DisplayAsync(Model.Content)
-    </div>
-}
+<div style="--dashboard-width: @(dashboardPart.Width); --dashboard-height: @(dashboardPart.Height);" class="dashboard-wrapper rounded" id="@(Model.Dashboard.ContentItemId)">
+    @await DisplayAsync(Model.Content)
+</div>
